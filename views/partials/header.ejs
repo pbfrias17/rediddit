@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Rediddit | Redid Reddit</title>
+    <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'>
+  </head>
+  <body>
+    <nav class='navbar navbar-default'>
+      <div class='container-fluid'>
+        <div class='collapse navbar-collapse'>
+          <ul class='nav navbar-nav'>
+            <li><a href='/'><span class='glyphicon glyphicon-home'></span></a></li>
+            <li><p class='navbar-text'>Top Subrediddits</p></li>
+            <li><p class='navbar-text'> | </p></li>
+            <% topSubs.forEach(function(sub) { %>
+              <li><a href=<%= '/r/' + sub.name %>><%= sub.name %></a></li>
+            <% }); %>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    
+    <div class='container'>

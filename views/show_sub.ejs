@@ -1,0 +1,15 @@
+<% include partials/header %>
+<% include partials/sub_header %>
+
+<div class='container-fluid'>
+  <a href=<%= '/r/' + sub.name + '/new' %>>Create New Post</a>
+  <ul>
+    <% if(posts) { %>
+      <% posts.forEach(function(post) { %>
+        <li><a href=<%= '/r/' + sub.name + '/comments/' + post._id %>><%= post.title %></a></li>
+      <% }); %>
+    <% } %>
+  </ul>
+</div>
+
+<% include partials/footer %>

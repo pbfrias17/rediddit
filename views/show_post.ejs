@@ -1,0 +1,32 @@
+<% include partials/header %>
+<% include partials/sub_header %>
+
+<div>
+  <h2><%= post.title %></h2>
+  <div class='well'>
+    <p><%= post.body %></p>
+  </div>
+</div>
+<div class='container-fluid'>
+  <h3>Post a comment</h3>
+  <% var action = '/r/' + sub.name + '/comments/' + post._id; %>
+  <form method='POST' action=<%= action %>>
+    <div class='form-group'>
+      <textarea class='form-control' name='body' rows=4></textarea>
+    </div>
+    <div class='form-group'>
+      <input class='btn btn-primary' type='submit' value='Comment'>
+    </div>
+  </form>
+  <h3>Comments</h3>
+  <ul>
+    <% comments.forEach(function(comment) { %>
+      <li><div>
+        <h4><%= comment.author + ' says:' %></h4>
+        <p><%= comment.body %></p>
+      </div></li>
+    <% }); %>
+  </ul>
+</div>
+
+<% include partials/footer %>
