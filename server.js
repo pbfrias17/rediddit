@@ -14,6 +14,7 @@ mongoose.connect('mongodb://localhost/rediddit');
 var topSubs = [];
 
 /* Database */
+/* UPDATE these to use referencing */
 var subredidditSchema = new mongoose.Schema({
   name: String,
   description: String,
