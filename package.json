@@ -4,7 +4,8 @@
   "description": "(Poorly) Redid Reddit",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "author": "pbfrias17",
   "license": "ISC",
@@ -15,5 +16,13 @@
     "express": "^4.14.0",
     "mongoose": "^4.7.6",
     "request": "^2.79.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pbfrias17/rediddit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pbfrias17/rediddit/issues"
+  },
+  "homepage": "https://github.com/pbfrias17/rediddit#readme"
 }
