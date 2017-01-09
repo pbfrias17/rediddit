@@ -1,9 +1,11 @@
-var express = require('express');
-var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
-var request = require('request');
-var consume = require('consume-http-header');
-var app = express();
+//var express = require('express');
+import express from 'express';
+import bodyParser from 'body-parser';
+import mongoose from 'mongoose';
+import request from 'request';
+import consume from 'consume-http-header';
+
+const app = express();
 
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -82,8 +84,8 @@ var User = mongoose.model('User', userSchema);
 
 
 /* Routes */
-app.get('/', function(req, res) {
-  Subrediddit.find({}, function(err, subs) {
+app.get('/', (req, res) => {
+  Subrediddit.find({}, (err, subs) => {
     if(err) {
       console.log('ERR on Sub.find()');
     } else {
@@ -94,15 +96,15 @@ app.get('/', function(req, res) {
   });
 });
 
-app.get('/subrediddits/new', function(req, res) {
+app.get('/subrediddits/new', (req, res) => {
   res.render('new_sub', { topSubs: topSubs });
 });
 
-app.post('/subrediddits', function(req, res) {
+app.post('/subrediddits', (req, res) => {
   Subrediddit.create({
     name: req.body.name,
     description: req.body.desc
-  }, function(err, sub) {
+  }, (err, sub) => {
     if(err) {
       console.log('ERR on Sub.create()');
     } else {
@@ -111,41 +113,14 @@ app.post('/subrediddits', function(req, res) {
   });
 });
 
-app.post('/games', function(req, res) {
-  //make sure the imgURL is a valid URL for an image
-  var imgURL = 'http://pisces.bbystatic.com/BestBuy_US/store/ee/2015/vg/pm/videogamecontroller-1000x555_blue.jpg;maxHeight=309;maxWidth=457';
-  var verOptions = { url: req.body.imgURL, method: 'HEAD' };
-  
-  request(verOptions, function(err, res, body) {
-    if(err || res.statusCode != 200 || !res.headers['content-type'].includes('image')) {
-      console.log('Something is wrong with imgURL provided');
-    } else {
-      imgURL = req.body.imgURL; 
-    }
-  });
-  
-  Post.create({
-    name: req.body.gameTitle,
-    img: imgURL
-  }, function(err, game) {
-    if(err) {
-      console.log('ERR on Game.create()');
-      res.redirect('/games/new');
-    } else {
-      console.log('Created new Game');
-      res.redirect('/games'); 
-    }
-  });
-});
-
-app.get('/r/:name', function(req, res) {
-  Subrediddit.find({ name: req.params.name }, function(err, subs) {
+app.get('/r/:name', (req, res) => {
+  Subrediddit.find({ name: req.params.name }, (err, subs) => {
     if(err) {
       console.log('ERR from Sub.find(name)');
       //show 'subrediddit not found' page
       
     } else {
-      Post.find({ subrediddit: req.params.name }, function(err, posts) {
+      Post.find({ subrediddit: req.params.name }, (err, posts) => {
         if(err) {
           console.log('ERR from Post.find(name)');
         } else {
@@ -156,12 +131,12 @@ app.get('/r/:name', function(req, res) {
   });
 });
 
-app.post('/r/:name', function(req, res) {
+app.post('/r/:name', (req, res) => {
   Post.create({
     title: req.body.title,
     body: req.body.body,
     subrediddit: req.params.name
-  }, function(err, post) {
+  }, (err, post) => {
     if(err) {
       console.log('ERR on post.create()');
     } else {
@@ -171,17 +146,17 @@ app.post('/r/:name', function(req, res) {
   });
 });
 
-app.get('/r/:name/new', function(req, res) {
+app.get('/r/:name/new', (req, res) => {
   res.render('new_post', { topSubs: topSubs, subName: req.params.name });
 });
 
-app.post('/r/:name/comments/:post_id', function(req, res) {
+app.post('/r/:name/comments/:post_id', (req, res) => {
   // less verification necessary since we can only comment
   // from within the post
   Comment.create({
     body: req.body.body,
     post_id: req.params.post_id 
-  }, function(err, comment) {
+  }, (err, comment) => {
     if(err) {
       console.log('ERR on Comment.create()');
     } else {
@@ -194,19 +169,19 @@ app.post('/r/:name/comments/:post_id', function(req, res) {
   });
 });
 
-app.get('/r/:name/comments/:post_id', function(req, res) {
+app.get('/r/:name/comments/:post_id', (req, res) => {
   // there must be a better way than this!
-  Subrediddit.find({ name: req.params.name }, function(err, subs) {
+  Subrediddit.find({ name: req.params.name }, (err, subs) => {
     if(err) {
       //subrediddit not found
       console.log('ERR on Sub.find(name)');
     } else {
-      Post.findById(req.params.post_id, function(err, post) {
+      Post.findById(req.params.post_id, (err, post) => {
         if(err) {
           //post not found
           console.log('ERR on Post.find(id)');
         } else {
-          Comment.find({ post_id: req.params.post_id }, function(err, comments) {
+          Comment.find({ post_id: req.params.post_id }, (err, comments) => {
             if(err) {
               console.log('ERR on Comment.find(subrediddit)');
             } else {
@@ -219,6 +194,6 @@ app.get('/r/:name/comments/:post_id', function(req, res) {
   });
 });
 
-app.listen(process.env.PORT, process.env.IP, function() {
+app.listen(process.env.PORT, process.env.IP, () => {
   console.log('Server listening...');
 });

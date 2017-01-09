@@ -5,11 +5,12 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "nodemon server.js --exec babel-node"
   },
   "author": "pbfrias17",
   "license": "ISC",
   "dependencies": {
+    "babel-cli": "^6.18.0",
     "body-parser": "^1.15.2",
     "consume-http-header": "^1.0.0",
     "ejs": "^2.5.5",
@@ -24,5 +25,10 @@
   "bugs": {
     "url": "https://github.com/pbfrias17/rediddit/issues"
   },
-  "homepage": "https://github.com/pbfrias17/rediddit#readme"
+  "homepage": "https://github.com/pbfrias17/rediddit#readme",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.18.0",
+    "babel-preset-stage-0": "^6.16.0",
+    "nodemon": "^1.11.0"
+  }
 }
