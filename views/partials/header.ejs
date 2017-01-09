@@ -16,6 +16,25 @@
               <li><a href=<%= '/r/' + sub.name %>><%= sub.name %></a></li>
             <% }); %>
           </ul>
+          <ul class='nav navbar-nav navbar-right'>
+            <% if(user) { /* user signed in? */ %>
+              <li><p class='navbar-text'><%= 'Hello, ' + user.username + '!' %></p></li>
+              <li><p class='navbar-text'> | </p></li>
+              <li><a href='/logout'>Logout</a></li>
+            <% } else { %>
+              <li><a href='/register'>Create Account</a></li>
+              <li><p class='navbar-text'> | </p></li>
+              <li>      
+                <form class="navbar-form" action='/login' method='POST'>
+                  <div class="form-group">
+                    <input type="text" class="form-control" name='username' placeholder="username">
+                    <input type='password' class='form-control' name='password' placeholder='password'>
+                  </div>
+                  <button type="submit" class="btn btn-default">Login</button>
+                </form>
+              </li>
+            <% } %>
+          </ul>
         </div>
       </div>
     </nav>

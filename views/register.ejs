@@ -1,0 +1,27 @@
+<% include partials/header %>
+
+<h2>Create a Subrediddit Account</h2>
+
+<% if (errorFlash != '') { %>
+  <div class="alert alert-danger" role="alert">
+    <p><%= errorFlash %></p>
+  </div>
+<% } %>
+
+<div class='container'>
+  <form method='POST' action='/register'>
+    <div class='form-group'>
+      <label for='title'>Username</label>
+      <input class='form-control' type='text' name='username'>
+    </div>
+    <div class='form-group'>
+      <label for='body'>Password</label>
+      <input class='form-control' type='password' name='password'></input>
+    </div>
+    <div class='form-group'>
+      <input class='btn btn-success' type='submit' value='Sign Up'>
+    </div>
+  </form>
+</div>
+
+<% include partials/footer %>

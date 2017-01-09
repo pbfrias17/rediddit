@@ -4,83 +4,42 @@ import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import request from 'request';
 import consume from 'consume-http-header';
+import passport from 'passport';
+import LocalStrategy from 'passport-local';
+import flash from 'connect-flash';
+import seedDB from './seeds';
+import { importLocals } from './middlewares/locals';
+import User from './models/user';
+import Subrediddit from './models/subrediddit';
+import Post from './models/post';
+import Comment from './models/comment';
 
 const app = express();
 
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(flash());
 app.set('view engine', 'ejs');
 mongoose.connect('mongodb://localhost/rediddit');
+seedDB();
+
+/* Passport Configuration */
+app.use(require('express-session')({
+  secret: 'I secretly Redid Reddit',
+  resave: false,
+  saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+// these middlewares must occur AFTER passport middlwares
+app.use(importLocals);
 
 /* Local Data */
 var topSubs = [];
-
-/* Database */
-/* UPDATE these to use referencing */
-var subredidditSchema = new mongoose.Schema({
-  name: String,
-  description: String,
-  subscribers: { type: Array, default: [] },
-  posts: { type: Array, default: [] }
-});
-
-var postSchema = new mongoose.Schema({
-  title: String,
-  body: String,
-  dateCreated: { type: Date, default: Date.now },
-  author: { type: String, default: 'unknown' },
-  comments: { type: Array, default: [] },
-  subrediddit: String,
-  votes: { type: Object, default: { up: 0, down: 0 } }
-});
-
-var commentSchema = new mongoose.Schema({
-  body: String,
-  author: { type: String, default: 'unknown' },
-  parents: { type: String, default: '' },
-  votes: { type: Object, default: { up: 0, down: 0 } },
-  post_id: String
-});
-
-var userSchema = new mongoose.Schema({
-  name: String,
-  password: String,
-  comments: Array, 
-  subscriptions: Array
-});
-
-var Subrediddit = mongoose.model('Subrediddit', subredidditSchema);
-var Post = mongoose.model('Post', postSchema);
-var Comment = mongoose.model('Comment', commentSchema);
-var User = mongoose.model('User', userSchema);
-
-/*Post.create({ 
-  title: 'Test Post 1', 
-  body: 'This is the body for Test Post 1',
-  author: 'Tester1'
-}, function(err, post) {
-  if(err) {
-    console.log('ERR on Post.create()');
-  } else {
-    console.log('Post Created:');
-    console.log(post);
-  }
-});*/
-
-/*Subrediddit.create([
-  { name: 'explainlikeimsix' },
-  { name: 'muchsleep' },
-  { name: 'jifs' },
-  { name: 'askrediddit' },
-  { name: 'todayialreadyknew' },
-  { name: 'titifu' }
-], function(err, subs) {
-  if(err) {
-    console.log('something went wrong when creating subs');
-  } else {
-    console.log(subs);
-  }
-});*/
 
 
 /* Routes */
@@ -90,10 +49,39 @@ app.get('/', (req, res) => {
       console.log('ERR on Sub.find()');
     } else {
       topSubs = subs;
-      
       res.render('index', { topSubs: topSubs });
     }
   });
+});
+
+app.get('/register', (req, res) => {
+  res.render('register', { topSubs: topSubs, errorFlash: req.flash('reg_error') });
+});
+
+app.post('/register', (req, res) => {
+  const newUser = new User({ username: req.body.username });
+  User.register(newUser, req.body.password, (err, user) => {
+    if(err) {
+      console.log(err);
+      req.flash('reg_error', err.message);
+      res.redirect('/register');
+    } else {
+      // if registration successful, login user
+      passport.authenticate('local')(req, res, () => {
+        res.redirect('/');
+      });
+    }
+  });
+});
+
+app.post('/login', passport.authenticate('local', {
+  successRedirect: '/',
+  failureRedirect: '/'
+}));
+
+app.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/');
 });
 
 app.get('/subrediddits/new', (req, res) => {
@@ -193,6 +181,7 @@ app.get('/r/:name/comments/:post_id', (req, res) => {
     }
   });
 });
+
 
 app.listen(process.env.PORT, process.env.IP, () => {
   console.log('Server listening...');
