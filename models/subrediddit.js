@@ -3,8 +3,18 @@ import mongoose from 'mongoose';
 var subredidditSchema = new mongoose.Schema({
   name: String,
   description: String,
-  subscribers: { type: Array, default: [] },
-  posts: { type: Array, default: [] }
+  subscribers: [
+    { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'User'
+    }
+  ],
+  posts: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Post'
+    }
+  ]
 });
 
 var Subrediddit = mongoose.model('Subrediddit', subredidditSchema);

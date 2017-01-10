@@ -1,18 +1,20 @@
 <% include partials/header %>
-<% include partials/sub_header %>
 
+<div class='jumbotron'>
+  <h2><%= 'r/' + post.subrediddit %></h2>
+</div>
 <div>
   <h2><%= post.title %></h2>
   <div class='well'>
     <p><%= post.body %></p>
   </div>
   <div class='well'>
-    <h5>Submitted by: <%= post.author %></h5>
+    <h5>Submitted by: <%= post.author.username %></h5>
   </div>
 </div>
 <div class='container-fluid'>
   <h3>Post a comment</h3>
-  <% var action = '/r/' + sub.name + '/comments/' + post._id; %>
+  <% var action = '/r/' + post.subrediddit + '/comments/' + post._id; %>
   <form method='POST' action=<%= action %>>
     <div class='form-group'>
       <textarea class='form-control' name='body' rows=4></textarea>
@@ -23,12 +25,14 @@
   </form>
   <h3>Comments</h3>
   <ul>
-    <% comments.forEach(function(comment) { %>
-      <li><div>
-        <h4><%= comment.author + ' says:' %></h4>
-        <p><%= comment.body %></p>
-      </div></li>
-    <% }); %>
+    <% if(post.comments) { %>
+      <% post.comments.forEach(function(comment) { %>
+        <li><div>
+          <h4><%= comment.author.username + ' says:' %></h4>
+          <p><%= comment.body %></p>
+        </div></li>
+      <% }); %>
+    <% } %>
   </ul>
 </div>
 

@@ -2,10 +2,21 @@ import mongoose from 'mongoose';
 
 var commentSchema = new mongoose.Schema({
   body: String,
-  author: { type: String, default: 'unknown' },
-  parents: { type: String, default: '' },
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  replies: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Comment'
+    }
+  ],
+  post: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Post'
+  },
   votes: { type: Object, default: { up: 0, down: 0 } },
-  post_id: String
 });
 
 var Comment = mongoose.model('Comment', commentSchema);

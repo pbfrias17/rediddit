@@ -35,7 +35,7 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-// these middlewares must occur AFTER passport middlwares
+// these middlewares must occur AFTER passport middlewares
 app.use(importLocals);
 
 /* Local Data */
@@ -102,19 +102,15 @@ app.post('/subrediddits', (req, res) => {
 });
 
 app.get('/r/:name', (req, res) => {
-  Subrediddit.find({ name: req.params.name }, (err, subs) => {
+  // find specific subrediddit and all it's post objects
+  Subrediddit.findOne({ name: req.params.name })
+  .populate('posts').exec((err, sub) => {
     if(err) {
       console.log('ERR from Sub.find(name)');
       //show 'subrediddit not found' page
       
     } else {
-      Post.find({ subrediddit: req.params.name }, (err, posts) => {
-        if(err) {
-          console.log('ERR from Post.find(name)');
-        } else {
-          res.render('show_sub', { topSubs: subs, sub: subs[0], posts: posts });
-        }
-      })
+      res.render('show_sub', { topSubs: [], sub: sub });
     }
   });
 });
@@ -123,13 +119,26 @@ app.post('/r/:name', (req, res) => {
   Post.create({
     title: req.body.title,
     body: req.body.body,
-    subrediddit: req.params.name
+    subrediddit: req.params.name,
+    author: req.user
   }, (err, post) => {
     if(err) {
-      console.log('ERR on post.create()');
+      console.log('ERR post.create(): ' + err);
     } else {
-      console.log('posting to ' + req.params.name);
-      res.redirect('/r/' + req.params.name); 
+      Subrediddit.findOne({ name: req.params.name }, (err, sub) => {
+        if(err) {
+          console.log('ERR sub.findOne(): ' + err);
+        } else {
+          sub.posts.push(post);
+          sub.save((err, data) => {
+            if(err) {
+              console.log('ERR on sub.save(): ' + err);
+            } else {
+              res.redirect('/r/' + req.params.name);
+            }
+          });
+        }
+      });
     }
   });
 });
@@ -143,39 +152,48 @@ app.post('/r/:name/comments/:post_id', (req, res) => {
   // from within the post
   Comment.create({
     body: req.body.body,
-    post_id: req.params.post_id 
+    author: req.user,
+    post: req.params.post_id 
   }, (err, comment) => {
     if(err) {
-      console.log('ERR on Comment.create()');
+      console.log('ERR on Comment.create(): ' + err);
     } else {
-      console.log(req);
-      console.log(req.body);
-      console.log(req.params);
-      
-      res.redirect(req.url);
+      Post.findById(req.params.post_id, (err, post) => {
+        if(err) {
+          console.log('ERR on Post.find(): ' + err);
+        } else {
+          post.comments.push(comment);
+          post.save((err, data) => {
+            if(err) {
+              // could not save
+            } else {
+              res.redirect(req.url); 
+            }
+          });
+        }
+      });
     }
   });
 });
 
 app.get('/r/:name/comments/:post_id', (req, res) => {
-  // there must be a better way than this!
-  Subrediddit.find({ name: req.params.name }, (err, subs) => {
+  Post.findById(req.params.post_id).populate(
+    { 
+      path: 'comments',
+      populate: { path: 'author' },
+    }).populate('author').exec((err, post) => {
     if(err) {
-      //subrediddit not found
-      console.log('ERR on Sub.find(name)');
+      res.render('dne_page');  
     } else {
-      Post.findById(req.params.post_id, (err, post) => {
+      Subrediddit.findOne({ name: req.params.name }, (err, sub) => {
         if(err) {
-          //post not found
-          console.log('ERR on Post.find(id)');
+          res.render('dne_sub');
         } else {
-          Comment.find({ post_id: req.params.post_id }, (err, comments) => {
-            if(err) {
-              console.log('ERR on Comment.find(subrediddit)');
-            } else {
-              res.render('show_post', { topSubs: topSubs, comments: comments, post: post, sub: subs[0]})
-            }
-          });
+          if(post.subrediddit != sub.name) {
+            res.render('dne_page');
+          } else {
+            res.render('show_post', { post });
+          }
         }
       }); 
     }
