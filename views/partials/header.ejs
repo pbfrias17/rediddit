@@ -12,6 +12,9 @@
             <li><a href='/'><span class='glyphicon glyphicon-home'></span></a></li>
             <li><p class='navbar-text'>Top Subrediddits</p></li>
             <li><p class='navbar-text'> | </p></li>
+            <% topSubs.forEach((sub) => { %>
+              <li><a href=<%= '/r/' + sub.name %>><%= sub.name %></a></li>
+            <% }); %>
           </ul>
           <ul class='nav navbar-nav navbar-right'>
             <% if(user) { /* user signed in? */ %>

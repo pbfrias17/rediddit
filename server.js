@@ -1,4 +1,3 @@
-//var express = require('express');
 import express from 'express';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
@@ -8,7 +7,7 @@ import passport from 'passport';
 import LocalStrategy from 'passport-local';
 import flash from 'connect-flash';
 import seedDB from './seeds';
-import { importLocals } from './middlewares/locals';
+import { importUser, importTopSubs, importCurrentSub } from './middlewares/locals';
 import User from './models/user';
 import Subrediddit from './models/subrediddit';
 import Post from './models/post';
@@ -21,7 +20,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(flash());
 app.set('view engine', 'ejs');
 mongoose.connect('mongodb://localhost/rediddit');
-seedDB();
+// Use bluebird
+mongoose.Promise = require('bluebird');
+//seedDB();
 
 /* Passport Configuration */
 app.use(require('express-session')({
@@ -36,26 +37,23 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 // these middlewares must occur AFTER passport middlewares
-app.use(importLocals);
-
-/* Local Data */
-var topSubs = [];
-
+app.use(importUser);
+app.use(importTopSubs);
+app.use('/r/:name/', importCurrentSub);
 
 /* Routes */
 app.get('/', (req, res) => {
-  Subrediddit.find({}, (err, subs) => {
+  Post.find({}).sort('-dateCreated').exec((err, posts) => {
     if(err) {
-      console.log('ERR on Sub.find()');
+      console.log('ERR on Post.find.sort(): ' + err);
     } else {
-      topSubs = subs;
-      res.render('index', { topSubs: topSubs });
+      res.render('index', { posts });
     }
   });
 });
 
 app.get('/register', (req, res) => {
-  res.render('register', { topSubs: topSubs, errorFlash: req.flash('reg_error') });
+  res.render('register', { errorFlash: req.flash('reg_error') });
 });
 
 app.post('/register', (req, res) => {
@@ -85,7 +83,7 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/subrediddits/new', (req, res) => {
-  res.render('new_sub', { topSubs: topSubs });
+  res.render('new_sub');
 });
 
 app.post('/subrediddits', (req, res) => {
@@ -103,16 +101,18 @@ app.post('/subrediddits', (req, res) => {
 
 app.get('/r/:name', (req, res) => {
   // find specific subrediddit and all it's post objects
-  Subrediddit.findOne({ name: req.params.name })
+  /*Subrediddit.findOne({ name: req.params.name })
   .populate('posts').exec((err, sub) => {
     if(err) {
       console.log('ERR from Sub.find(name)');
       //show 'subrediddit not found' page
       
     } else {
-      res.render('show_sub', { topSubs: [], sub: sub });
+      res.render('show_sub', { sub });
     }
-  });
+  });*/
+  
+  res.render('show_sub');
 });
 
 app.post('/r/:name', (req, res) => {
@@ -144,7 +144,7 @@ app.post('/r/:name', (req, res) => {
 });
 
 app.get('/r/:name/new', (req, res) => {
-  res.render('new_post', { topSubs: topSubs, subName: req.params.name });
+  res.render('new_post', { subName: req.params.name });
 });
 
 app.post('/r/:name/comments/:post_id', (req, res) => {
@@ -177,11 +177,10 @@ app.post('/r/:name/comments/:post_id', (req, res) => {
 });
 
 app.get('/r/:name/comments/:post_id', (req, res) => {
-  Post.findById(req.params.post_id).populate(
-    { 
-      path: 'comments',
-      populate: { path: 'author' },
-    }).populate('author').exec((err, post) => {
+  Post.findById(req.params.post_id).populate({ 
+    path: 'comments',
+    populate: { path: 'author' },
+  }).populate('author').exec((err, post) => {
     if(err) {
       res.render('dne_page');  
     } else {

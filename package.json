@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "babel-cli": "^6.18.0",
+    "bluebird": "^3.4.7",
     "body-parser": "^1.15.2",
     "connect-flash": "^0.1.1",
     "consume-http-header": "^1.0.0",

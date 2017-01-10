@@ -6,4 +6,16 @@
 </div>
 <a class='btn btn-lg btn-success' href='/subrediddits/new'>Create New Subrediddit</a>
 
+<div class='container'>
+  <ul>
+    <% if(posts.length > 0) { %>
+      <% posts.forEach(function(post) { %>
+        <li><a href=<%= '/r/' + post.subrediddit + '/comments/' + post._id %>><%= post.title %></a></li>
+      <% }); %>
+    <% } else { %>
+      <h3>No posts yet!</h3>
+    <% } %>
+  </ul>
+</div>
+
 <% include partials/footer %>
