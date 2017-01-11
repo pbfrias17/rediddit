@@ -2,12 +2,14 @@
 <% include partials/sub_header %>
 
 <div>
-  <h2><%= post.title %></h2>
-  <div class='well'>
-    <p><%= post.body %></p>
-  </div>
-  <div class='well'>
-    <h5>Submitted by: <%= post.author.username %></h5>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title"><%= post.title %></h3>
+    </div>
+    <div class="panel-body">
+      <%= post.body %>
+    </div>
+    <div class="panel-footer"><%= post.author.username %></div>
   </div>
 </div>
 <div class='container-fluid'>
@@ -25,13 +27,27 @@
   <ul>
     <% if(post.comments) { %>
       <% post.comments.forEach(function(comment) { %>
-        <li><div>
-          <h4><%= comment.author.username + ' says:' %></h4>
-          <p><%= comment.body %></p>
-        </div></li>
+        <li>
+          <div class='well'>
+            <div class='votes'>
+              <button id='vote_up'>UP</button>
+              <div><h5><%= comment.votes.up - comment.votes.down %></h5></div>
+              <button id='vote_down'>DOWN</button>
+            </div>
+            <div class='comment-body'>
+              <h5><strong><%= comment.author.username + ' says:' %></strong></h5>
+              <p><%= comment.body %></p>
+            </div>
+          </div>
+        </li>
       <% }); %>
     <% } %>
   </ul>
 </div>
 
+<script>
+  $('#vote_up').on('click', function(event) {
+    $.post("https://rediddit-pbfrias17.c9users.io/r/dev/votes/58756f551d98c4334666d802");
+  });
+</script>
 <% include partials/footer %>

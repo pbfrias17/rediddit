@@ -1,3 +1,8 @@
+/* Collection of middleware functions used to 
+*  localize data for view templates and other
+*  use-cases
+*/
+
 import mongoose from 'mongoose';
 import request from 'request';
 import consume from 'consume-http-header';
@@ -28,24 +33,31 @@ const importTopSubs = (req, res, next) => {
 }
 
 const importCurrentSub = (req, res, next) => {
-  if(req.method === 'GET') {
-    // populate 'posts' when at r/subName
-    const populateField = ( req.url.length <= 1 ) ? 'posts' : '';
+  // populate 'posts' when at r/subName
+  const populateField = ( req.url.length <= 1 ) ? 'posts' : '';
+  
+  Subrediddit.findOne({ name: req.params.name }).
+  populate(populateField).exec((err, sub) => {
+    if(err) {
+      console.log('ERR on sub.find(): ' + err);
+    } else {
+      console.log('populated ' + populateField);
+      res.locals.sub = sub; 
+    }
     
-    Subrediddit.findOne({ name: req.params.name }).
-    populate(populateField).exec((err, sub) => {
-      if(err) {
-        console.log('ERR on sub.find(): ' + err);
-      } else {
-        console.log('populated ' + populateField);
-        res.locals.sub = sub; 
-      }
-      
-      next();
-    });
-  } else {
     next();
-  }
+  });
 }
 
-export { importUser, importTopSubs, importCurrentSub };
+
+const importCurrentPost = (req, res, next) => {
+  Post.findById(req.params.post_id, (err, post) => {
+    if(err) {
+      console.log('ERR on post.find(id): ' + err);
+    } else {
+      res.locals.post = post;
+    }
+  });  
+}
+
+export { importUser, importTopSubs, importCurrentSub, importCurrentPost };

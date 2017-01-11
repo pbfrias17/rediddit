@@ -36,7 +36,9 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-// these middlewares must occur AFTER passport middlewares
+/* Middlwares
+*  must be after passport middlwares
+*/
 app.use(importUser);
 app.use(importTopSubs);
 app.use('/r/:name/', importCurrentSub);
@@ -100,18 +102,6 @@ app.post('/subrediddits', (req, res) => {
 });
 
 app.get('/r/:name', (req, res) => {
-  // find specific subrediddit and all it's post objects
-  /*Subrediddit.findOne({ name: req.params.name })
-  .populate('posts').exec((err, sub) => {
-    if(err) {
-      console.log('ERR from Sub.find(name)');
-      //show 'subrediddit not found' page
-      
-    } else {
-      res.render('show_sub', { sub });
-    }
-  });*/
-  
   res.render('show_sub');
 });
 
@@ -125,18 +115,12 @@ app.post('/r/:name', (req, res) => {
     if(err) {
       console.log('ERR post.create(): ' + err);
     } else {
-      Subrediddit.findOne({ name: req.params.name }, (err, sub) => {
+      res.locals.sub.posts.push(post);
+      res.locals.sub.save((err, data) => {
         if(err) {
-          console.log('ERR sub.findOne(): ' + err);
+          console.log('ERR on sub.save(): ' + err);
         } else {
-          sub.posts.push(post);
-          sub.save((err, data) => {
-            if(err) {
-              console.log('ERR on sub.save(): ' + err);
-            } else {
-              res.redirect('/r/' + req.params.name);
-            }
-          });
+          res.redirect('/r/' + req.params.name);
         }
       });
     }
@@ -184,21 +168,19 @@ app.get('/r/:name/comments/:post_id', (req, res) => {
     if(err) {
       res.render('dne_page');  
     } else {
-      Subrediddit.findOne({ name: req.params.name }, (err, sub) => {
-        if(err) {
-          res.render('dne_sub');
-        } else {
-          if(post.subrediddit != sub.name) {
-            res.render('dne_page');
-          } else {
-            res.render('show_post', { post });
-          }
-        }
-      }); 
+      if(post.subrediddit != res.locals.sub.name) {
+        res.render('dne_page');
+      } else {
+        res.render('show_post', { post });
+      }
     }
   });
 });
 
+app.post('/r/:name/votes/:post_id', (req, res) => {
+  console.log(req.headers);
+  res.send('thanks for voting!');
+});
 
 app.listen(process.env.PORT, process.env.IP, () => {
   console.log('Server listening...');
