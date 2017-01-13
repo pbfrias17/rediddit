@@ -12,6 +12,7 @@ import User from './models/user';
 import Subrediddit from './models/subrediddit';
 import Post from './models/post';
 import Comment from './models/comment';
+import Vote from './models/vote';
 
 const app = express();
 
@@ -132,8 +133,6 @@ app.get('/r/:name/new', (req, res) => {
 });
 
 app.post('/r/:name/comments/:post_id', (req, res) => {
-  // less verification necessary since we can only comment
-  // from within the post
   Comment.create({
     body: req.body.body,
     author: req.user,
@@ -177,8 +176,13 @@ app.get('/r/:name/comments/:post_id', (req, res) => {
   });
 });
 
-app.post('/r/:name/votes/:post_id', (req, res) => {
-  console.log(req.headers);
+app.post('/r/:name/vote/:post_id', (req, res) => {
+  console.log(req.user.username + ' voted ' + req.body.vote + " on post " + req.params.post_id);
+  res.send('thanks for voting!');
+});
+
+app.post('/r/vote/:comment_id', (req, res) => {
+  console.log(req.user.username + ' voted ' + req.body.vote + " on post " + req.params.comment_id);
   res.send('thanks for voting!');
 });
 

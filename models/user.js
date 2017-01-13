@@ -21,7 +21,14 @@ var userSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Subrediddit'
     }
-  ]
+  ],
+  votes: [{
+    comment_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Comment'    
+    },
+    rating: String
+  }]
 });
 
 userSchema.plugin(passportLocalMongoose);

@@ -15,7 +15,15 @@ var postSchema = new mongoose.Schema({
     }
   ],
   subrediddit: String,
-  votes: { type: Object, default: { up: 0, down: 0 } }
+  votes: [
+    {
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'  
+      },
+      value: { type: Number, default: 0 }
+    }
+  ]
 });
 
 var Post = mongoose.model('Post', postSchema);

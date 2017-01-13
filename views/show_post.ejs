@@ -2,14 +2,21 @@
 <% include partials/sub_header %>
 
 <div>
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title"><%= post.title %></h3>
+  <div class='row post-container'>
+    <div class='col-md-1 votes'>
+      <button id='vote_up'><span class='glyphicon glyphicon-triangle-top'></span></button>
+      <div id='vote_count'><h5><%= comment.votes.up - comment.votes.down %></h5></div>
+      <button id='vote_down'><span class='glyphicon glyphicon-triangle-bottom'></span></button>
     </div>
-    <div class="panel-body">
-      <%= post.body %>
+    <div class="col-md-11 panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><%= post.title %></h3>
+      </div>
+      <div class="panel-body">
+        <%= post.body %>
+      </div>
+      <div class="panel-footer">Posted By: <%= post.author.username %></div>
     </div>
-    <div class="panel-footer"><%= post.author.username %></div>
   </div>
 </div>
 <div class='container-fluid'>
@@ -28,13 +35,13 @@
     <% if(post.comments) { %>
       <% post.comments.forEach(function(comment) { %>
         <li>
-          <div class='well'>
-            <div class='votes'>
-              <button id='vote_up'>UP</button>
-              <div><h5><%= comment.votes.up - comment.votes.down %></h5></div>
-              <button id='vote_down'>DOWN</button>
+          <div class='well row comment-container' data-comm-id=<%= comment._id %>>
+            <div class='col-md-1 votes'>
+              <button id='vote_up'><span class='glyphicon glyphicon-triangle-top'></span></button>
+              <div id='vote_count'><h5><%= comment.votes.up - comment.votes.down %></h5></div>
+              <button id='vote_down'><span class='glyphicon glyphicon-triangle-bottom'></span></button>
             </div>
-            <div class='comment-body'>
+            <div class='col-md-11 comment-body'>
               <h5><strong><%= comment.author.username + ' says:' %></strong></h5>
               <p><%= comment.body %></p>
             </div>
@@ -46,8 +53,20 @@
 </div>
 
 <script>
+  var getCommVoteURL = function(child) {
+    var baseURL = 'https://rediddit-pbfrias17.c9users.io/r/vote/';
+    return baseURL.concat(child.closest('.comment-container').data('commId'));
+  };
+
   $('#vote_up').on('click', function(event) {
-    $.post("https://rediddit-pbfrias17.c9users.io/r/dev/votes/58756f551d98c4334666d802");
+    console.log(getCommVoteURL($('#vote_up')));
+    $.post(getCommVoteURL($('#vote_up')), { vote: 'up' }, function() {
+      $('#vote_count').html('1');
+    });
+  });
+  
+  $('#vote_down').on('click', function(event) {
+    $.post("https://rediddit-pbfrias17.c9users.io/r/dev/vote/58756f551d98c4334666d802", { vote: 'down' });
   });
 </script>
 <% include partials/footer %>

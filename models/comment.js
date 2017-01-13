@@ -16,7 +16,15 @@ var commentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Post'
   },
-  votes: { type: Object, default: { up: 0, down: 0 } },
+  votes: [
+    {
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'  
+      },
+      value: { type: Number, default: 0 }
+    }
+  ]
 });
 
 var Comment = mongoose.model('Comment', commentSchema);
